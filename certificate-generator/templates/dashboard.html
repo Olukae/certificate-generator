@@ -1,0 +1,125 @@
+<!-- ==================== -->
+<!-- FILE: dashboard.html -->
+<!-- ==================== -->
+{% extends "base.html" %}
+{% block title %}Dashboard - Certificate Generator{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="display-5 fw-bold">
+        <i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard
+      </h1>
+      <p class="lead text-muted">Generate and manage your certificates</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left: Generate Certificates -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-primary text-white py-3">
+          <h4 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>Generate Certificates
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data">
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-file-earmark-image me-2"></i>Certificate Template
+              </label>
+              <input class="form-control" type="file" name="template" accept="image/*,.pdf" required>
+              <small class="text-muted">Upload your certificate template (PNG, JPG, or PDF)</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-filetype-csv me-2"></i>Upload CSV File
+              </label>
+              <input class="form-control" type="file" name="csv_file" accept=".csv">
+              <small class="text-muted">CSV must contain a "name" column</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-pencil-square me-2"></i>Or Enter Names Manually
+              </label>
+              <textarea class="form-control" name="manual_names" rows="5" placeholder="Enter names (one per line or comma separated)...">{{ request.form.manual_names }}</textarea>
+              <small class="text-muted">Example: John Doe, Jane Smith, Bob Johnson</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-fonts me-2"></i>Select Font
+              </label>
+              <select class="form-select" name="font_choice">
+                {% for font in fonts %}
+                  <option value="{{ font }}" {% if request.form.get('font_choice') == font %}selected{% endif %}>{{ font }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <button class="btn btn-primary btn-lg w-100" type="submit">
+              <i class="bi bi-lightning-charge-fill me-2"></i>Generate Certificates
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Certificates List -->
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-success text-white py-3">
+          <h4 class="mb-0">
+            <i class="bi bi-file-earmark-check me-2"></i>Your Certificates
+          </h4>
+        </div>
+        <div class="card-body p-4">
+          {% if certs %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-primary fs-6">{{ certs|length }} Certificate(s)</span>
+              </div>
+              <div class="list-group mb-3" style="max-height: 400px; overflow-y: auto;">
+                {% for cert in certs %}
+                  <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                      <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                      <span class="fw-medium">{{ cert.filename }}</span>
+                    </div>
+                    <a href="{{ url_for('download', filename=cert.filename) }}" class="btn btn-sm btn-outline-success">
+                      <i class="bi bi-download me-1"></i>Download
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-2">
+              <a href="{{ url_for('download_all') }}" class="btn btn-success btn-lg">
+                <i class="bi bi-cloud-download me-2"></i>Download All as PDF
+              </a>
+              <a href="{{ url_for('clear_all_files') }}" class="btn btn-outline-danger"
+                 onclick="return confirm('Are you sure you want to clear all certificate files? This action cannot be undone.');">
+                <i class="bi bi-trash me-2"></i>Clear All Files
+              </a>
+            </div>
+          {% else %}
+            <div class="text-center py-5">
+              <div class="mb-3">
+                <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+              </div>
+              <h5 class="text-muted">No certificates yet</h5>
+              <p class="text-muted">Generate your first certificate using the form on the left</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
